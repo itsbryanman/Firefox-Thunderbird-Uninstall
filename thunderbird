@@ -1,0 +1,34 @@
+# Uninstall Thunderbird Script
+# Option to backup user data
+$backupData = $true  # Set to $false if you do not want to back up user data
+
+# Define backup location for Thunderbird profiles
+$backupLocation = "$env:USERPROFILE\ThunderbirdBackup"
+$thunderbirdPaths = @(
+    "$env:ProgramFiles\Mozilla Thunderbird\uninstall\helper.exe",
+    "$env:ProgramFiles(x86)\Mozilla Thunderbird\uninstall\helper.exe",
+    "$env:LOCALAPPDATA\Mozilla Thunderbird\uninstall\helper.exe"
+)
+
+# Backup Thunderbird user data if needed
+if ($backupData) {
+    Write-Output "Backing up Thunderbird profiles..."
+    $thunderbirdProfilePath = "$env:APPDATA\Thunderbird\Profiles"
+    if (Test-Path $thunderbirdProfilePath) {
+        Copy-Item -Path $thunderbirdProfilePath -Destination $backupLocation -Recurse -Force
+        Write-Output "Backup completed at $backupLocation"
+    } else {
+        Write-Output "Thunderbird profiles not found."
+    }
+}
+
+# Uninstall Thunderbird silently
+foreach ($path in $thunderbirdPaths) {
+    if (Test-Path $path) {
+        Write-Output "Uninstalling Thunderbird from $path..."
+        Start-Process -FilePath $path -ArgumentList "/S" -NoNewWindow -Wait
+        Write-Output "Uninstalled Thunderbird from $path."
+    }
+}
+
+Write-Output "Thunderbird uninstallation complete."
