@@ -1,0 +1,34 @@
+# Uninstall Firefox Script
+# Option to backup user data
+$backupData = $true  # Set to $false if you do not want to back up user data
+
+# Define backup location for Firefox profiles
+$backupLocation = "$env:USERPROFILE\FirefoxBackup"
+$firefoxPaths = @(
+    "$env:ProgramFiles\Mozilla Firefox\uninstall\helper.exe",
+    "$env:ProgramFiles(x86)\Mozilla Firefox\uninstall\helper.exe",
+    "$env:LOCALAPPDATA\Mozilla Firefox\uninstall\helper.exe"
+)
+
+# Backup Firefox user data if needed
+if ($backupData) {
+    Write-Output "Backing up Firefox profiles..."
+    $firefoxProfilePath = "$env:APPDATA\Mozilla\Firefox\Profiles"
+    if (Test-Path $firefoxProfilePath) {
+        Copy-Item -Path $firefoxProfilePath -Destination $backupLocation -Recurse -Force
+        Write-Output "Backup completed at $backupLocation"
+    } else {
+        Write-Output "Firefox profiles not found."
+    }
+}
+
+# Uninstall Firefox silently
+foreach ($path in $firefoxPaths) {
+    if (Test-Path $path) {
+        Write-Output "Uninstalling Firefox from $path..."
+        Start-Process -FilePath $path -ArgumentList "/S" -NoNewWindow -Wait
+        Write-Output "Uninstalled Firefox from $path."
+    }
+}
+
+Write-Output "Firefox uninstallation complete."
